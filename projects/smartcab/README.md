@@ -31,3 +31,5 @@ To complete this task, simply have your driving agent choose a random action fro
 QUESTION: Observe what you see with the agent's behavior as it takes random actions. Does the smartcab eventually make it to the destination? Are there any other interesting observations to note?
 * I assume yes, but paused it before allowing it to do so. With no deadline and a 'random walk' through the city streets it will eventually make it to the destination but will take a very long time to do so.
 Because it listens to no inputs the only interesting behavior is it's complete randomness.
+
+Code on commit: 0b302db
