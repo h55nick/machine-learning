@@ -19,6 +19,18 @@ class LearningAgent(Agent):
         self.planner.route_to(destination)
         # TODO: Prepare for a new trip; reset any variables here, if required
 
+    def get_traffic_state(self, inputs):
+        if inputs['oncoming'] != None:
+            # to make consistent with next_waypoint output
+            traffic = 'straight'
+        elif inputs['right'] != None:
+            traffic = 'right'
+        elif inputs['left'] != None:
+            traffic = 'left'
+        else:
+            traffic = None
+        return traffic
+
     def update(self, t):
         # Gather inputs
         self.next_waypoint = self.planner.next_waypoint()  # from route planner, also displayed by simulator
@@ -26,6 +38,11 @@ class LearningAgent(Agent):
         deadline = self.env.get_deadline(self)
 
         # TODO: Update state
+        self.state = {
+            'light': inputs['light'],
+            'next_waypoint': self.next_waypoint,
+            'traffic': self.get_traffic_state(inputs)
+        }
 
         actions = [None, 'forward', 'left', 'right']
         # TODO: Select action according to your policy
@@ -35,8 +52,7 @@ class LearningAgent(Agent):
         reward = self.env.act(self, action)
 
         # TODO: Learn policy based on state, action, reward
-
-        print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
+        print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}, next_waypoint = {}, state = {}".format(deadline, inputs, action, reward, self.next_waypoint, self.state)  # [debug]
 
 
 def run():
