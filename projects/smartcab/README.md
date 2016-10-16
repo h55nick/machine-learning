@@ -48,4 +48,6 @@ Each of these states include valuable input that is needed to make the next acti
 start making assumptions around the model and take away from the exercise in building a reinforcement learner as we would be making assumptions around the cost of such an action.
 [optional] This means that there will be 2 * 3 * 3 = 18 total number of states for this environment which seems very reasonable.
 
+Code on commit: 9758de9
+
 
