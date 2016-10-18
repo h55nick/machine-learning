@@ -50,4 +50,17 @@ start making assumptions around the model and take away from the exercise in bui
 
 Code on commit: 9758de9
 
+===
+### Implement a Q-Learning Driving Agent
+With your driving agent being capable of interpreting the input information and having a mapping of environmental states, your next task is to implement the Q-Learning algorithm for your driving agent to choose the best action at each time step, based on the Q-values for the current state and action. Each action taken by the smartcab will produce a reward which depends on the state of the environment. The Q-Learning driving agent will need to consider these rewards when updating the Q-values. Once implemented, set the simulation deadline enforcement enforce_deadline to True. Run the simulation and observe how the smartcab moves about the environment in each trial.
+
+The formulas for updating Q-values can be found in this video.
+
+QUESTION: What changes do you notice in the agent's behavior when compared to the basic driving agent when random actions were always taken? Why is this behavior occurring?
+
+Well that is very cool. The first time I wrote it I didn't have randomness in the 'select action' method and the car just went around in a circle, always taking a right.
+The changes here are significant of course. The random driving car had a very low probability of getting to the destination and while at the start they looked very similair, by the end of the simulation
+every simulation resulted in a success. After turning on the simulator view it also looked like near the end it was pretty efficient as well.
+
+
 

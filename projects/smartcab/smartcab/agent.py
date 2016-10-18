@@ -13,7 +13,10 @@ class LearningAgent(Agent):
         self.color = 'green'  # override color
         self.planner = RoutePlanner(self.env, self)  # simple route planner to get next_waypoint
         # TODO: Initialize any additional variables here
-        self.enforce_deadline = False
+        self.enforce_deadline = True
+        self.table = {}
+        self.alpha=0.5
+        self.gamma=0.5
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
@@ -31,6 +34,31 @@ class LearningAgent(Agent):
             traffic = None
         return traffic
 
+    def get_value(self, state, action):
+        return self.table.get(state, {}).get(action, 0)
+
+    def max_Q_value(self, state):
+        maxQ = 0
+        for action in self.env.valid_actions:
+            this_value = self.get_value(state, action)
+            if this_value > maxQ:
+                maxQ = this_value
+        return maxQ
+
+    def set_value(self, state, action, reward):
+        old_value = self.get_value(state, action)
+        new_value = old_value * (1 - self.alpha) + self.alpha * (reward + self.gamma * self.max_Q_value(state=state))
+        self.table.get(state, {})[action] = new_value
+
+    def chooseAction(self, state):
+        best_actions = []
+        maxQ = self.max_Q_value(state)
+        for act in self.env.valid_actions:
+            if self.get_value(state, act) == maxQ:
+               best_actions.append(act)
+        return random.choice(best_actions)
+
+
     def update(self, t):
         # Gather inputs
         self.next_waypoint = self.planner.next_waypoint()  # from route planner, also displayed by simulator
@@ -38,20 +66,25 @@ class LearningAgent(Agent):
         deadline = self.env.get_deadline(self)
 
         # TODO: Update state
-        self.state = {
+        self.state_hash = {
             'light': inputs['light'],
             'next_waypoint': self.next_waypoint,
             'traffic': self.get_traffic_state(inputs)
         }
+        self.state = 'light: {}, traffic, {}, next_waypoint: {}'.format(self.state_hash['light'], self.state_hash['traffic'], self.next_waypoint)
+        # ensure proper {} exists for state
+        self.table[self.state] = self.table.get(self.state, {})
 
-        actions = [None, 'forward', 'left', 'right']
         # TODO: Select action according to your policy
-        action = random.choice(actions)
+        action = self.chooseAction(self.state)
+        #random.choice(self.env.valid_actions)
 
         # Execute action and get reward
         reward = self.env.act(self, action)
 
         # TODO: Learn policy based on state, action, reward
+        self.set_value(self.state, action, reward)
+
         print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}, next_waypoint = {}, state = {}".format(deadline, inputs, action, reward, self.next_waypoint, self.state)  # [debug]
 
 
@@ -65,7 +98,7 @@ def run():
     # NOTE: You can set enforce_deadline=False while debugging to allow longer trials
 
     # Now simulate it
-    sim = Simulator(e, update_delay=0.5, display=True)  # create simulator (uses pygame when display=True, if available)
+    sim = Simulator(e, update_delay=0.1, display=False)  # create simulator (uses pygame when display=True, if available)
     # NOTE: To speed up simulation, reduce update_delay and/or set display=False
 
     sim.run(n_trials=100)  # run for a specified number of trials
