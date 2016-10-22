@@ -86,7 +86,7 @@ For which set of parameters does the agent perform best? How well does the final
 * effort = indicates how slowly the car got to destination (low is good)
 
 |alpha | gamma | alpha-d | gamma-d | success% | max-% (t) | effort |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 |.9    |  .9  | self.alpha / ln(t + 2) | None | 99 | 63 | .77 |
 |.9    |  .9  | self.alpha / ln(t + 2) | self.gamma / ln(t) | 98 | 97 | .80 |
 |.9    |  .9  | None | None | 99 | 98 | .81|
