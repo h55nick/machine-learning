@@ -108,5 +108,7 @@ QUESTION: Does your agent get close to finding an optimal policy, i.e. reach the
 I think it does get close, but not completely optimal. The penalties are built into the learner and given the q-learning algo is much like a gradient decent algo (the same?) this is learning to incur the 
 lowest amount of penalties.
 
+commit: e1617ff
+
 
 
