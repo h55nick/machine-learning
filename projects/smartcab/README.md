@@ -85,14 +85,15 @@ For which set of parameters does the agent perform best? How well does the final
 * max-% (t) = trial that best success rate was achieved
 * effort = indicates how slowly the car got to destination (low is good)
 
-alpha | gamma | alpha-d | gamma-d | success% | max-% (t) | effort
-.9    |  .9  | self.alpha / ln(t + 2) | None | 99 | 63 | .77
-.9    |  .9  | self.alpha / ln(t + 2) | self.gamma / ln(t) | 98 | 97 | .80
-.9    |  .9  | None | None | 99 | 98 | .81
-.1    |  .1  | None | None | 97  | 98 | .88
-.9    |  .1  | None | None | 97 | 97 | .77
-.9    |  .9  | self.alpha / t | None | 98 | 99 | .82
-.5    |  .5  | None | None | 98 | 99 | .8
+|alpha | gamma | alpha-d | gamma-d | success% | max-% (t) | effort |
+|---|---|---|---|---|---|
+|.9    |  .9  | self.alpha / ln(t + 2) | None | 99 | 63 | .77 |
+|.9    |  .9  | self.alpha / ln(t + 2) | self.gamma / ln(t) | 98 | 97 | .80 |
+|.9    |  .9  | None | None | 99 | 98 | .81|
+|.1    |  .1  | None | None | 97  | 98 | .88|
+|.9    |  .1  | None | None | 97 | 97 | .77|
+|.9    |  .9  | self.alpha / t | None | 98 | 99 | .82|
+|.5    |  .5  | None | None | 98 | 99 | .8|
 
 I believe the first row (.9, .9, w/alpha decay) is the best. It achieves the highest success% and has one of the lowest effort scores.
 This indicates the weighing the finnal outcome heavily is in the best interest of this learner by keeping the gamma value high through out.
