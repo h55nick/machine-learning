@@ -44,7 +44,7 @@ QUESTION: What states have you identified that are appropriate for modeling the 
 OPTIONAL: How many states in total exist for the smartcab in this environment? Does this number seem reasonable given that the goal of Q-Learning is to learn and make informed decisions about each state? Why or why not?
 
 * State is defined in agent.py now. Inputs include 'light' ['green','red'], next_waypoint ['forward', 'right', 'left'], and traffic ['left', 'right', 'straight'].
-Each of these states include valuable input that is needed to make the next action. I would be curious if we could remove states that have inherit comflict, like traffic = next_waypoint but believe that would 
+Each of these states include valuable input that is needed to make the next action. I would be curious if we could remove states that have inherit comflict, like traffic = next_waypoint but believe that would
 start making assumptions around the model and take away from the exercise in building a reinforcement learner as we would be making assumptions around the cost of such an action.
 [optional] This means that there will be 2 * 3 * 3 = 18 total number of states for this environment which seems very reasonable.
 
@@ -63,6 +63,50 @@ The changes here are significant of course. The random driving car had a very lo
 every simulation resulted in a success. After turning on the simulator view it also looked like near the end it was pretty efficient as well.
 
 Code on commit: e22ee58
+
+===
+### Improve the Q-Learning Driving Agent
+Your final task for this project is to enhance your driving agent so that, after sufficient training, the smartcab is able to reach the destination within the allotted time safely and efficiently. Parameters in the Q-Learning algorithm, such as the learning rate (alpha), the discount factor (gamma) and the exploration rate (epsilon) all contribute to the driving agent’s ability to learn the best action for each state. To improve on the success of your smartcab:
+
+Set the number of trials, n_trials, in the simulation to 100.
+Run the simulation with the deadline enforcement enforce_deadline set to True (you will need to reduce the update delay update_delay and set the display to False).
+Observe the driving agent’s learning and smartcab’s success rate, particularly during the later trials.
+Adjust one or several of the above parameters and iterate this process.
+This task is complete once you have arrived at what you determine is the best combination of parameters required for your driving agent to learn successfully.
+
+QUESTION: Report the different values for the parameters tuned in your basic implementation of Q-Learning.
+For which set of parameters does the agent perform best? How well does the final driving agent perform?
+
+* alpha = starting alpha (or const if no alpha-d)
+* gamma = starting gamma (or const if no gamma-d)
+* alpha-d = alpha change calculation
+* gamma-d = gammma change calculation
+* success% = success rate at iteration 100
+* max-% (t) = trial that best success rate was achieved
+* effort = indicates how slowly the car got to destination (low is good)
+
+alpha | gamma | alpha-d | gamma-d | success% | max-% (t) | effort
+.9    |  .9  | self.alpha / ln(t + 2) | None | 99 | 63 | .77
+.9    |  .9  | self.alpha / ln(t + 2) | self.gamma / ln(t) | 98 | 97 | .80
+.9    |  .9  | None | None | 99 | 98 | .81
+.1    |  .1  | None | None | 97  | 98 | .88
+.9    |  .1  | None | None | 97 | 97 | .77
+.9    |  .9  | self.alpha / t | None | 98 | 99 | .82
+.5    |  .5  | None | None | 98 | 99 | .8
+
+I believe the first row (.9, .9, w/alpha decay) is the best. It achieves the highest success% and has one of the lowest effort scores.
+This indicates the weighing the finnal outcome heavily is in the best interest of this learner by keeping the gamma value high through out.
+I am a little worried the alpha decay is not really needed but these specific findings are consistent with the lecture learnings.
+Even though these are run over 100 trials, only one 'learning' run was done for each row and could have led to some inaccurate numbers.
+
+The final driving agent works very well. With very high success rate, it seems to have learned the rules quickly (max-t 63), while also reaching
+the destination with minimal effort.
+
+
+QUESTION: Does your agent get close to finding an optimal policy, i.e. reach the destination in the minimum possible time, and not incur any penalties? How would you describe an optimal policy for this problem?
+
+I think it does get close, but not completely optimal. The penalties are built into the learner and given the q-learning algo is much like a gradient decent algo (the same?) this is learning to incur the 
+lowest amount of penalties.
 
 
 

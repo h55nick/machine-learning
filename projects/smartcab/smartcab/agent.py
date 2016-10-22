@@ -15,8 +15,14 @@ class LearningAgent(Agent):
         # TODO: Initialize any additional variables here
         self.enforce_deadline = True
         self.table = {}
-        self.alpha=0.5
-        self.gamma=0.5
+        # recorder helpers
+        self.recorder = []
+        self.recorder_avgs = []
+        self.recorder_t = []
+        self.max_success = 0
+        # q vars
+        self.alpha=0.9
+        self.gamma=0.9
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
@@ -58,6 +64,34 @@ class LearningAgent(Agent):
                best_actions.append(act)
         return random.choice(best_actions)
 
+    def update_influence_variables(self, t):
+        # self.gamma = self.gamma / ln(t)
+        self.alpha =  self.alpha / ln(t + 2)
+        print('1')
+
+    def avg(self, array):
+        return sum(array)/float(len(array))
+
+    def record_results(self, deadline, reward, t):
+        # if success
+        if reward == 12:
+            self.recorder.append(1)
+
+        # if fail
+        if deadline == 1:
+            self.recorder.append(0)
+
+        if reward == 12 or deadline == 1:
+            self.recorder_t.append(float(t)/15)
+            current_average = self.avg(self.recorder)
+            t_average = self.avg(self.recorder_t)
+            # to avoid t=1 success skewing.
+            if current_average != 1:
+                self.recorder_avgs.append(current_average)
+                self.max_success = max(self.recorder_avgs)
+                max_at = self.recorder_avgs.index(self.max_success)
+            print "Success%: {} {}, max: {}, max_trial {}, t-avg, {}".format(len(self.recorder), current_average, self.max_success, max_at, t_average)
+
 
     def update(self, t):
         # Gather inputs
@@ -85,7 +119,10 @@ class LearningAgent(Agent):
         # TODO: Learn policy based on state, action, reward
         self.set_value(self.state, action, reward)
 
-        print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}, next_waypoint = {}, state = {}".format(deadline, inputs, action, reward, self.next_waypoint, self.state)  # [debug]
+        print "t-{} LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}, next_waypoint = {}, state = {}".format(t, deadline, inputs, action, reward, self.next_waypoint, self.state)  # [debug]
+
+        self.record_results(deadline, reward, t)
+
 
 
 def run():
@@ -98,7 +135,7 @@ def run():
     # NOTE: You can set enforce_deadline=False while debugging to allow longer trials
 
     # Now simulate it
-    sim = Simulator(e, update_delay=0.1, display=False)  # create simulator (uses pygame when display=True, if available)
+    sim = Simulator(e, update_delay=0, display=False)  # create simulator (uses pygame when display=True, if available)
     # NOTE: To speed up simulation, reduce update_delay and/or set display=False
 
     sim.run(n_trials=100)  # run for a specified number of trials
