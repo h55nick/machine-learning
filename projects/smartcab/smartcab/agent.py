@@ -29,15 +29,19 @@ class LearningAgent(Agent):
         # TODO: Prepare for a new trip; reset any variables here, if required
 
     def get_traffic_state(self, inputs):
+        """
+        defines all the traffic violation states, inclusive of multiple
+        """
+        traffic = ''
         if inputs['oncoming'] != None:
             # to make consistent with next_waypoint output
-            traffic = 'straight'
-        elif inputs['right'] != None:
-            traffic = 'right'
-        elif inputs['left'] != None:
-            traffic = 'left'
+            traffic = traffic + 'straight'
+        if inputs['right'] != None:
+            traffic =  traffic + 'right'
+        if inputs['left'] != None:
+            traffic = traffic + 'left'
         else:
-            traffic = None
+            traffic = ''
         return traffic
 
     def get_value(self, state, action):
@@ -73,6 +77,7 @@ class LearningAgent(Agent):
         return sum(array)/float(len(array))
 
     def record_results(self, deadline, reward, t):
+        print "temp Q-Table {}".format(self.table)
         # if success
         if reward == 12:
             self.recorder.append(1)
@@ -91,7 +96,16 @@ class LearningAgent(Agent):
                 self.max_success = max(self.recorder_avgs)
                 max_at = self.recorder_avgs.index(self.max_success)
             print "Success%: {} {}, max: {}, max_trial {}, t-avg, {}".format(len(self.recorder), current_average, self.max_success, max_at, t_average)
+            print "Final Q-Table {}".format(self.table)
 
+
+    def violation_state(self, inputs):
+        if inputs['light'] == 'green':
+            #  NOTE: no light violation, check traffic.
+            return self.get_traffic_state(inputs)
+        else:
+            # NOTE: red light.
+            return 'red'
 
     def update(self, t):
         # Gather inputs
@@ -101,12 +115,10 @@ class LearningAgent(Agent):
 
         # TODO: Update state
         self.state_hash = {
-            'light': inputs['light'],
+            'violation': self.violation_state(inputs),
             'next_waypoint': self.next_waypoint,
-            'traffic': self.get_traffic_state(inputs)
         }
-        self.state = 'light: {}, traffic, {}, next_waypoint: {}'.format(self.state_hash['light'], self.state_hash['traffic'], self.next_waypoint)
-        # ensure proper {} exists for state
+        self.state = 'violation: {}, next_waypoint: {}'.format(self.state_hash['violation'], self.next_waypoint)
         self.table[self.state] = self.table.get(self.state, {})
 
         # TODO: Select action according to your policy

@@ -43,10 +43,10 @@ QUESTION: What states have you identified that are appropriate for modeling the 
 
 OPTIONAL: How many states in total exist for the smartcab in this environment? Does this number seem reasonable given that the goal of Q-Learning is to learn and make informed decisions about each state? Why or why not?
 
-* State is defined in agent.py now. Inputs include 'light' ['green','red'], next_waypoint ['forward', 'right', 'left'], and traffic ['left', 'right', 'straight'].
-Each of these states include valuable input that is needed to make the next action. I would be curious if we could remove states that have inherit comflict, like traffic = next_waypoint but believe that would
-start making assumptions around the model and take away from the exercise in building a reinforcement learner as we would be making assumptions around the cost of such an action.
-[optional] This means that there will be 2 * 3 * 3 = 18 total number of states for this environment which seems very reasonable.
+* State is defined in agent.py now. Inputs include 'violation' and next_waypoint. The viloation state combines the traffic and the light to create one aspect of the state space in an effort to reduce the total state space while preserving the various outputs the of traffic.
+Each of these states include valuable input that is needed to make the next action. I believe the current 'viloation' state is making assumptions around the model and takes away from the exercise in building a reinforcement learner as we are making assumptions around the cost of such an action. (it was suggested by the reviewer, although I'm worried I might have misunderstood.) 
+
+These inputs were decided on so as to minimize the q-table which allows for optimal learning assuming all needed states are included. The biggest ommission is 'deadline' which is because that information is embedded in 'next_waypoint'. The viloation state is very powerful as it includes all inputs that can cause a negative reward and powers the 'rules of the road'.
 
 Code on commit: 9758de9
 
@@ -60,7 +60,23 @@ QUESTION: What changes do you notice in the agent's behavior when compared to th
 
 Well that is very cool. The first time I wrote it I didn't have randomness in the 'select action' method and the car just went around in a circle, always taking a right.
 The changes here are significant of course. The random driving car had a very low probability of getting to the destination and while at the start they looked very similair, by the end of the simulation
-every simulation resulted in a success. After turning on the simulator view it also looked like near the end it was pretty efficient as well.
+every simulation resulted in a success. After turning on the simulator view it also looked like near the end it was pretty efficient as well. Looking at the q-table was the easiest way for me to see that by the end of the runs the cab had properly learned the rules of the road and to follow the waypoint:
+
+
+|  State | Ouput | Optimal? |
+| --- | --- | --- |
+|'violation: , next_waypoint: right': {'right': 27.843821572888867, None: 0.0} | Yes|
+| 'violation: left, next_waypoint: right'| {'forward': -0.45, 'right': 1.8, None: 0.0, 'left': -0.45} | Yes |
+| 'violation: red, next_waypoint: forward' | {'forward': -0.9, 'right': -0.45, None: 0.0, 'left': -0.9} | Yes |
+| 'violation: left, next_waypoint: forward' | {'forward': 8.642614959180001, 'right': -0.45, 'left': -0.45} | Yes |
+|'violation: left, next_waypoint: left'| {'left': 12.438} | No |
+|'violation: red, next_waypoint: right' | {'right': 23.33036904894389, 'left': -0.9}| No |
+|'violation: , next_waypoint: left' | {'left': 29.075114953276987}| Yes |
+|'violation: , next_waypoint: forward'| {'forward': 38.21669650442579, None: 0.0, 'left': -0.45} | Yes |
+|'violation: red, next_waypoint: left'| {'forward': -0.9, 'right': -0.1009163384892992, None: 0.0, 'left': -0.9}| Yes |
+(Note: table without Greedy Epsilon implemented)
+
+As we can see from the above algorithm we can see that while it is near optimal the final q-table still makes mistakes on waypoint 'right' and violation 'red' and violation left and waypoint left. This could be because it a large reward (finishing) by violating the rules of the road, therfore making it positive and never leaving the locally optimal strategy. To make this more realistic we could also change the rewards so that in no case would it make sense to disobey the rules of the road. Another adjustment that could be made would be to add the greedy-epsilon algorithm and adjust the states as there is a clear interplay between violation and next_waypoint but, again, I feel like that is defeating the purpose of a general q-learner.
 
 Code on commit: e22ee58
 
@@ -83,7 +99,7 @@ For which set of parameters does the agent perform best? How well does the final
 * gamma-d = gammma change calculation
 * success% = success rate at iteration 100
 * max-% (t) = trial that best success rate was achieved
-* effort = indicates how slowly the car got to destination (low is good)
+* effort = indicates how slowly the car got to destination (low is good) This is a measure (over 15) of the number of iterations it took to get to the destination so the faster (lower) it got there the better. 
 
 |alpha | gamma | alpha-d | gamma-d | success% | max-% (t) | effort |
 |---|---|---|---|---|---|---|
@@ -101,13 +117,26 @@ I am a little worried the alpha decay is not really needed but these specific fi
 Even though these are run over 100 trials, only one 'learning' run was done for each row and could have led to some inaccurate numbers.
 
 The final driving agent works very well. With very high success rate, it seems to have learned the rules quickly (max-t 63), while also reaching
-the destination with minimal effort.
+the destination with minimal effort. The table below shows that while this is a stronger learner it is not optimal.  This currently preforms well when there is an empty violation parameter which confirms what I said in the previous question, that combining some states, would lead to greater accuracy. The optimal policy is outlined in the table with changes in the 'Optimal Change' column. The incorrect policy lines were discussed in the previous question.
+
+(copied from above)
+|  State | Ouput | Optimal? | Optimal Change (if not)|
+| --- | --- | --- | --- |
+|'violation: , next_waypoint: right': {'right': 27.843821572888867, None: 0.0} | Yes|
+| 'violation: left, next_waypoint: right'| {'forward': -0.45, 'right': 1.8, None: 0.0, 'left': -0.45} | Yes ||
+| 'violation: red, next_waypoint: forward' | {'forward': -0.9, 'right': -0.45, None: 0.0, 'left': -0.9} | Yes ||
+| 'violation: left, next_waypoint: forward' | {'forward': 8.642614959180001, 'right': -0.45, 'left': -0.45} | Yes ||
+|'violation: left, next_waypoint: left'| {'left': 12.438} | No | { None: 0.0 }
+|'violation: red, next_waypoint: right' | {'right': 23.33036904894389, 'left': -0.9}| No | { None: 0.0 }|
+|'violation: , next_waypoint: left' | {'left': 29.075114953276987}| Yes ||
+|'violation: , next_waypoint: forward'| {'forward': 38.21669650442579, None: 0.0, 'left': -0.45} | Yes ||
+|'violation: red, next_waypoint: left'| {'forward': -0.9, 'right': -0.1009163384892992, None: 0.0, 'left': -0.9}| Yes ||
+(Note: table without Greedy Epsilon implemented)
 
 
 QUESTION: Does your agent get close to finding an optimal policy, i.e. reach the destination in the minimum possible time, and not incur any penalties? How would you describe an optimal policy for this problem?
 
-I think it does get close, but not completely optimal. The penalties are built into the learner and given the q-learning algo is much like a gradient decent algo (the same?) this is learning to incur the 
-lowest amount of penalties.
+I think it does get close, but not completely optimal. The penalties are built into the learner and given the q-learning algo is much like a gradient decent algo (the same?) this is learning to incur the lowest amount of penalties.
 
 commit: e1617ff
 
