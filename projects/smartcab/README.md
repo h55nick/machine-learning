@@ -102,7 +102,7 @@ For which set of parameters does the agent perform best? How well does the final
 * effort = indicates how slowly the car got to destination (low is good) This is a measure (over 15) of the number of iterations it took to get to the destination so the faster (lower) it got there the better. 
 
 |alpha | gamma | alpha-d | gamma-d | success% | max-% (t) | effort |
-|---|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|---|
 |.9    |  .9  | self.alpha / ln(t + 2) | None | 99 | 63 | .77 |
 |.9    |  .9  | self.alpha / ln(t + 2) | self.gamma / ln(t) | 98 | 97 | .80 |
 |.9    |  .9  | None | None | 99 | 98 | .81|
@@ -120,9 +120,11 @@ The final driving agent works very well. With very high success rate, it seems t
 the destination with minimal effort. The table below shows that while this is a stronger learner it is not optimal.  This currently preforms well when there is an empty violation parameter which confirms what I said in the previous question, that combining some states, would lead to greater accuracy. The optimal policy is outlined in the table with changes in the 'Optimal Change' column. The incorrect policy lines were discussed in the previous question.
 
 (copied from above)
+
+
 |  State | Ouput | Optimal? | Optimal Change (if not)|
-| --- | --- | --- | --- |
-|'violation: , next_waypoint: right': {'right': 27.843821572888867, None: 0.0} | Yes|
+| --- | --- | --- |---|
+|'violation: , next_waypoint: right'| {'right': 27.843821572888867, None: 0.0} | Yes|
 | 'violation: left, next_waypoint: right'| {'forward': -0.45, 'right': 1.8, None: 0.0, 'left': -0.45} | Yes ||
 | 'violation: red, next_waypoint: forward' | {'forward': -0.9, 'right': -0.45, None: 0.0, 'left': -0.9} | Yes ||
 | 'violation: left, next_waypoint: forward' | {'forward': 8.642614959180001, 'right': -0.45, 'left': -0.45} | Yes ||
