@@ -98,15 +98,6 @@ class LearningAgent(Agent):
             print "Success%: {} {}, max: {}, max_trial {}, t-avg, {}".format(len(self.recorder), current_average, self.max_success, max_at, t_average)
             print "Final Q-Table {}".format(self.table)
 
-
-    def violation_state(self, inputs):
-        if inputs['light'] == 'green':
-            #  NOTE: no light violation, check traffic.
-            return self.get_traffic_state(inputs)
-        else:
-            # NOTE: red light.
-            return 'red'
-
     def update(self, t):
         # Gather inputs
         self.next_waypoint = self.planner.next_waypoint()  # from route planner, also displayed by simulator
@@ -115,10 +106,11 @@ class LearningAgent(Agent):
 
         # TODO: Update state
         self.state_hash = {
-            'violation': self.violation_state(inputs),
-            'next_waypoint': self.next_waypoint,
+            'light': inputs['light'],
+            'traffic': self.get_traffic_state(inputs),
+            'next_waypoint': self.next_waypoint
         }
-        self.state = 'violation: {}, next_waypoint: {}'.format(self.state_hash['violation'], self.next_waypoint)
+        self.state = 'light: {}, next_waypoint: {}, traffic: {}'.format(self.state_hash['light'], self.next_waypoint, self.state_hash['traffic'])
         self.table[self.state] = self.table.get(self.state, {})
 
         # TODO: Select action according to your policy
@@ -131,7 +123,7 @@ class LearningAgent(Agent):
         # TODO: Learn policy based on state, action, reward
         self.set_value(self.state, action, reward)
 
-        print "t-{} LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}, next_waypoint = {}, state = {}".format(t, deadline, inputs, action, reward, self.next_waypoint, self.state)  # [debug]
+        # print "t-{} LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}, next_waypoint = {}, state = {}".format(t, deadline, inputs, action, reward, self.next_waypoint, self.state)  # [debug]
 
         self.record_results(deadline, reward, t)
 
